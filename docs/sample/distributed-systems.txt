@@ -1,0 +1,23 @@
+Partitioning
+
+Partitioning divides a large dataset into smaller pieces called partitions or shards. The aim is to distribute data and load across machines. Good partitioning improves scalability because reads and writes can be spread across nodes.
+
+Key-based partitioning assigns each record to a partition based on a key. A common approach is to hash the key and use the hash to select a partition. This usually distributes keys evenly, but it can still create hotspots if a small number of keys receive a disproportionate amount of traffic.
+
+Range partitioning assigns contiguous ranges of keys to partitions. It can make range scans efficient, but it is vulnerable to skew if many writes target the same range. For example, timestamp-based keys can create a hot partition when all new writes go to the latest range.
+
+Secondary indexes complicate partitioning. If an index is local to each partition, a query may need to scatter across all partitions. If an index is global, writes become more complex because the index may live on a different partition from the primary record.
+
+Kafka Partitioning Keys
+
+In Kafka-like log systems, a topic is split into partitions. Messages with the same key are normally routed to the same partition. This is useful when consumers require per-key ordering. The trade-off is that a poor key can cause uneven load. A very popular customer ID, tenant ID, or account ID can produce a hot partition.
+
+Choosing a partitioning key is therefore a modelling decision. You balance ordering, locality, fan-out, and load distribution. Sometimes the right design uses a composite key or adds controlled randomness to avoid hotspots, but that can weaken strict per-key ordering.
+
+Replication
+
+Replication keeps copies of data on multiple machines. It can improve availability and read scalability. In leader-based replication, writes go to one leader and are copied to followers. In multi-leader or leaderless designs, conflict handling becomes more important.
+
+Consistency
+
+Distributed systems often trade latency, availability, and consistency. Stronger consistency can make reasoning easier, but it usually requires coordination. Weaker consistency can improve availability and latency, but moves complexity into application logic.
